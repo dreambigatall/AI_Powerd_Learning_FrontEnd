@@ -1,4 +1,4 @@
-
+// src/app/materials/[materialId]/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -14,14 +14,13 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, BrainCircuit, HelpCircle, MessageSquare, Loader2 } from "lucide-react";
-import { FileText } from "lucide-react";
+import { ArrowLeft, BrainCircuit, HelpCircle, MessageSquare, Loader2, FileText } from "lucide-react";
 
 // Our Custom Components
 import Quiz, { type QuizQuestion } from "@/components/Quiz";
 import Chat from "@/components/Chat";
-import Markdown from 'react-markdown'
-// Dynamically import the PDF Viewer to prevent SSR issues
+import Markdown from 'react-markdown';
+
 const PdfViewer = dynamic(() => import('@/components/PdfViewer'), {
   ssr: false,
 });
@@ -29,7 +28,7 @@ const PdfViewer = dynamic(() => import('@/components/PdfViewer'), {
 // Type Definitions
 interface GeneratedContent {
   _id: string;
-  type: 'summary' | 'questions';
+  type: 'summary' | 'questions' | 'chat'; // <-- CHANGED LINE: Added 'chat'
   content: string;
 }
 
@@ -56,40 +55,25 @@ const fetchMaterialDetails = async (materialId: string, session: Session | null)
   return response.json();
 };
 
-// CORRECTED: The 'async' keyword has been removed from this function definition.
 export default function MaterialStudyPage() {
   const { user, supabase, isLoading: authLoading } = useSupabase();
   const params = useParams();
   const queryClient = useQueryClient();
-  const materialId = Array.isArray(params.materialId)
-    ? params.materialId[0]
-    : params.materialId ?? "";
+  const materialId = Array.isArray(params.materialId) ? params.materialId[0] : params.materialId ?? "";
   const [pdfUrl, setPdfUrl] = useState<string | null>(null);
 
-  // Data Fetching
-  // const { data: material, isLoading: isMaterialLoading, error } = useQuery({
-  //   queryKey: ['material', materialId],
-  //   queryFn: () => {
-  //     if (!materialId) throw new Error("Material ID is required");
-  //     return supabase.auth.getSession().then(res => fetchMaterialDetails(materialId, res.data.session));
-  //   },
-  //   enabled: !!user && !!materialId,
-  // });
-    // Data Fetching with Caching Optimization
-    const { data: material, isLoading: isMaterialLoading, error } = useQuery({
-      queryKey: ['material', materialId],
-      queryFn: () => {
-        if (!materialId) throw new Error("Material ID is required");
-        return supabase.auth.getSession().then(res => fetchMaterialDetails(materialId as string, res.data.session));
-      },
-      enabled: !!user && !!materialId,
-      
-      // --- PERFORMANCE OPTIMIZATIONS ---
-      staleTime: 5 * 60 * 1000, // 5 minutes
-      refetchOnWindowFocus: false,
-      refetchOnReconnect: false,
+  const { data: material, isLoading: isMaterialLoading, error } = useQuery({
+    queryKey: ['material', materialId],
+    queryFn: () => {
+      if (!materialId) throw new Error("Material ID is required");
+      return supabase.auth.getSession().then(res => fetchMaterialDetails(materialId as string, res.data.session));
+    },
+    enabled: !!user && !!materialId,
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   });
-  // Effect to get signed URL for PDF
+
   useEffect(() => {
     if (material?.storagePath) {
       let isMounted = true;
@@ -114,6 +98,7 @@ export default function MaterialStudyPage() {
   // Data Transformations
   const summary = material?.generatedContent?.find(c => c.type === 'summary');
   const quizData = material?.generatedContent?.find(c => c.type === 'questions');
+  const chatData = material?.generatedContent?.find(c => c.type === 'chat'); // <-- NEW LINE
   const quizQuestions: QuizQuestion[] | null = quizData ? JSON.parse(quizData.content) : null;
 
   // AI Generation Mutations
@@ -242,28 +227,22 @@ export default function MaterialStudyPage() {
               <TabsTrigger
                 value="chat"
                 className="flex items-center gap-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg data-[state=active]:font-bold data-[state=active]:scale-105 transition-all"
-                aria-label="Chat (coming soon)"
+                aria-label="Chat with Document"
               >
                 <MessageSquare className="mr-1 h-4 w-4" />Chat
               </TabsTrigger>
             </TabsList>
 
             <div className="mt-2 flex-grow overflow-y-auto pr-0 md:pr-2">
-              {/* Summary Tab */}
               <TabsContent value="summary">
                 <Card className="shadow-md border bg-background/95 transition-all">
                   <CardHeader className="flex flex-row items-center gap-2 pb-2 border-b">
                     <BrainCircuit className="h-5 w-5 text-primary/80" />
                     <CardTitle className="text-base font-semibold">AI Summary</CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="p-4">
                     {summary ? (
-                      // <p className="text-base leading-relaxed whitespace-pre-wrap text-foreground/90 animate-fade-in">
-                        <Markdown>
-                        {summary.content}
-                        </Markdown>
-                       
-                      // </p>
+                        <div className="prose dark:prose-invert max-w-none"><Markdown>{summary.content}</Markdown></div>
                     ) : (
                       <div className="flex flex-col items-center justify-center py-10 text-center animate-fade-in">
                         <BrainCircuit className="h-10 w-10 text-muted-foreground mb-2" />
@@ -277,18 +256,9 @@ export default function MaterialStudyPage() {
                 </Card>
               </TabsContent>
 
-              {/* Quiz Tab */}
               <TabsContent value="quiz">
                 {quizQuestions ? (
-                  <Card className="shadow-md border bg-background/95 transition-all">
-                    <CardHeader className="flex flex-row items-center gap-2 pb-2 border-b">
-                      <HelpCircle className="h-5 w-5 text-primary/80" />
-                      <CardTitle className="text-base font-semibold">AI-Generated Quiz</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <Quiz questions={quizQuestions} />
-                    </CardContent>
-                  </Card>
+                  <Quiz questions={quizQuestions} />
                 ) : (
                   <Card className="shadow-md border bg-background/95 transition-all">
                     <CardHeader className="flex flex-row items-center gap-2 pb-2 border-b">
@@ -308,17 +278,13 @@ export default function MaterialStudyPage() {
                 )}
               </TabsContent>
 
-              {/* Chat Tab */}
-              <TabsContent value="chat">
-                <Card className="shadow-md border bg-background/95 transition-all">
-                  <CardHeader className="flex flex-row items-center gap-2 pb-2 border-b">
-                    <MessageSquare className="h-5 w-5 text-primary/80" />
-                    <CardTitle className="text-base font-semibold">Chat with your Document</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {materialId && <Chat materialId={materialId} />}
-                  </CardContent>
-                </Card>
+              <TabsContent value="chat" className="h-full flex flex-col">
+                {materialId && (
+                  <Chat 
+                    materialId={materialId} 
+                    savedChatContent={chatData?.content || null} // <-- CHANGED LINE
+                  />
+                )}
               </TabsContent>
             </div>
           </Tabs>

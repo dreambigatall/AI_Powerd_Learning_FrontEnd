@@ -65,6 +65,7 @@ export default function FileUpload({ onUploadSuccess }: { onUploadSuccess: () =>
     onDrop,
     accept: {
       'application/pdf': ['.pdf'],
+      'application/msword': ['.doc'],
       'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
       'text/plain': ['.txt'],
     },
@@ -83,7 +84,7 @@ export default function FileUpload({ onUploadSuccess }: { onUploadSuccess: () =>
       ) : isDragActive ? (
         <p>Drop the file here ...</p>
       ) : (
-        <p>Drag 'n' drop a PDF, DOCX, or TXT file here, or click to select</p>
+        <p>Drag 'n' drop a PDF, DOC, DOCX, or TXT file here, or click to select</p>
       )}
     </div>
   );
