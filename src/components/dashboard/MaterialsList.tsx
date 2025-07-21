@@ -1,5 +1,5 @@
 import { Input } from "@/components/ui/input";
-import { Search, LayoutDashboard, FileText } from "lucide-react";
+import { Search, LayoutDashboard, FileText, BookOpen } from "lucide-react";
 import { MaterialItem } from "./MaterialItem";
 import type { Material } from "@/lib/supabase/types";
 
@@ -56,7 +56,9 @@ export const MaterialsList = ({ materials, isLoading, error, searchTerm, setSear
         <section id="materials" className="animate-fadeIn">
             <div className="mb-6 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
                 <h2 className="text-2xl font-bold flex items-center gap-3 text-slate-800 dark:text-slate-200">
-                    <LayoutDashboard className="h-6 w-6 text-purple-500" />
+                    <span className="rounded-lg bg-gradient-to-tr from-blue-500 to-purple-500 p-1.5 shadow-md">
+                        <BookOpen className="h-7 w-7 text-white drop-shadow" />
+                    </span>
                     Your Materials
                 </h2>
                 <div className="relative w-full sm:w-64">

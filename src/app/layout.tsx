@@ -5,7 +5,7 @@ import "./globals.css";
 import SupabaseProvider from "@/context/AuthContext"; // <-- Import
 import { Toaster } from "sonner";
 import QueryProvider from "@/context/QueryProvider"; // <-- Import
-
+import Navbar from "@/components/Navbar";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -21,14 +21,13 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-      <SupabaseProvider>
-        <QueryProvider>
-          
-            {children}
-          
-        </QueryProvider>
+        <SupabaseProvider>
+          <QueryProvider>
+            <Navbar /> {/* <-- Add the Navbar here */}
+            <main>{children}</main> {/* <-- Wrap children in <main> */}
+            <Toaster richColors position="top-right" />
+          </QueryProvider>
         </SupabaseProvider>
-        <Toaster />
       </body>
     </html>
   );
