@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
 import { UploadCloud, FileText, HelpCircle, MessageSquare, Loader2 } from "lucide-react";
 
 // This is the component that contains the actual landing page content

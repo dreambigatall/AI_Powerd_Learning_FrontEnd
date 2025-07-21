@@ -4,7 +4,7 @@
 import Link from "next/link";
 import { useSupabase } from "@/context/AuthContext";
 import { Button } from "./ui/button";
-import { BrainCircuit, BookOpen } from "lucide-react";
+import {  BookOpen } from "lucide-react";
 
 export default function Navbar() {
   const { user, isLoading } = useSupabase();

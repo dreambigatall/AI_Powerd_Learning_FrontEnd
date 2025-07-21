@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 
 import { fetchMaterials } from "@/lib/helpers";
-import type { Material } from "@/lib/supabase/types";
+
 
 import { Header } from "@/components/dashboard/Header";
 import { Sidebar } from "@/components/dashboard/Sidebar";

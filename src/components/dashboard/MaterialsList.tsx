@@ -1,5 +1,5 @@
 import { Input } from "@/components/ui/input";
-import { Search, LayoutDashboard, FileText, BookOpen } from "lucide-react";
+import { Search, FileText, BookOpen } from "lucide-react";
 import { MaterialItem } from "./MaterialItem";
 import type { Material } from "@/lib/supabase/types";
 

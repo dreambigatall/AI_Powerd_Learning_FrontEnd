@@ -133,7 +133,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Link from 'next/link';
 // Import only the GitHub icon
 import { FaGithub } from "react-icons/fa";
-import type { Provider } from '@supabase/supabase-js';
+
 
 export default function LoginPage() {
   const { supabase } = useSupabase();
@@ -266,7 +266,7 @@ export default function LoginPage() {
             
             <div className="text-center">
               <p className="text-sm text-gray-600">
-                Don't have an account?{' '}
+              Don&#39;t have an account?{' '}
                 <Link href="/signup" className="font-medium text-blue-600 hover:text-blue-500 transition-colors">
                   Sign up
                 </Link>

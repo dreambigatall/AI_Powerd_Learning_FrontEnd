@@ -51,7 +51,7 @@
 
 import { createContext, useContext, useEffect, useState } from 'react';
 import { createClient } from '@/lib/supabase/client';
-import type { SupabaseClient, User } from '@supabase/supabase-js';
+import type {  User } from '@supabase/supabase-js';
 
 // 1. UPDATE THE CONTEXT'S TYPE DEFINITION
 // We add `isLoading` to the type so components can access it.

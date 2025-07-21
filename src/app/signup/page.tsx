@@ -12,7 +12,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Mail, Lock, Eye, EyeOff, UserPlus, AlertCircle, CheckCircle } from 'lucide-react';
 // Import only the GitHub icon
 import { FaGithub } from "react-icons/fa";
-import type { Provider } from '@supabase/supabase-js';
+
 
 export default function SignupPage() {
   const { supabase } = useSupabase();
