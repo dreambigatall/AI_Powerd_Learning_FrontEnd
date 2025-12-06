@@ -20,9 +20,14 @@ export const fetchMaterials = async (session: Session | null): Promise<Material[
 type FileVisuals = { icon: React.ReactElement; badge: string };
 
 export const getFileVisuals = (fileType: string): FileVisuals => {
-    if (fileType.startsWith("image")) return { icon: <Image className="h-6 w-6 text-blue-400" />, badge: "IMG" };
-    if (fileType.startsWith("video")) return { icon: <Video className="h-6 w-6 text-purple-400" />, badge: "VID" };
-    if (fileType.startsWith("audio")) return { icon: <Music className="h-6 w-6 text-pink-400" />, badge: "AUDIO" };
-    if (fileType.includes("pdf")) return { icon: <FileText className="h-6 w-6 text-red-400" />, badge: "PDF" };
-    return { icon: <FileText className="h-6 w-6 text-slate-400" />, badge: "FILE" };
+    // eslint-disable-next-line jsx-a11y/alt-text
+    if (fileType.startsWith("image")) return { icon: <Image className="h-6 w-6 text-blue-400" aria-hidden="true" />, badge: "IMG" };
+    // eslint-disable-next-line jsx-a11y/alt-text
+    if (fileType.startsWith("video")) return { icon: <Video className="h-6 w-6 text-purple-400" aria-hidden="true" />, badge: "VID" };
+    // eslint-disable-next-line jsx-a11y/alt-text
+    if (fileType.startsWith("audio")) return { icon: <Music className="h-6 w-6 text-pink-400" aria-hidden="true" />, badge: "AUDIO" };
+    // eslint-disable-next-line jsx-a11y/alt-text
+    if (fileType.includes("pdf")) return { icon: <FileText className="h-6 w-6 text-red-400" aria-hidden="true" />, badge: "PDF" };
+    // eslint-disable-next-line jsx-a11y/alt-text
+    return { icon: <FileText className="h-6 w-6 text-slate-400" aria-hidden="true" />, badge: "FILE" };
 };

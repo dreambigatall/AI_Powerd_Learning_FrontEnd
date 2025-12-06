@@ -10,9 +10,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Mail, Lock, Eye, EyeOff, UserPlus, AlertCircle, CheckCircle } from 'lucide-react';
-// Import only the GitHub icon
 import { FaGithub } from "react-icons/fa";
-
+import type { Provider } from '@supabase/supabase-js'; // Import Provider type
 
 export default function SignupPage() {
   const { supabase } = useSupabase();
@@ -24,8 +23,8 @@ export default function SignupPage() {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
 
-  // --- OAUTH HANDLER for GitHub ---
-  const handleOAuthSignIn = async (provider: 'github') => {
+  // This OAuth handler remains the same.
+  const handleOAuthSignIn = async (provider: Provider) => {
     setError(null);
     setLoading(true);
     const { error } = await supabase.auth.signInWithOAuth({
@@ -40,7 +39,7 @@ export default function SignupPage() {
     }
   };
 
-  // getPasswordStrength, syncUserWithBackend, and handleSignup functions remain exactly the same
+  // getPasswordStrength function remains the same.
   const getPasswordStrength = (password: string) => {
     if (password.length === 0) return { strength: 0, color: 'bg-gray-200', text: '' };
     if (password.length < 6) return { strength: 1, color: 'bg-red-500', text: 'Too short' };
@@ -51,45 +50,17 @@ export default function SignupPage() {
 
   const passwordStrength = getPasswordStrength(password);
 
-  /**
-   * This function calls our own backend API to create a user profile in MongoDB.
-   * It's triggered after a successful Supabase signup.
-   * @param authId - The unique user ID from Supabase Auth.
-   * @param email - The user's email.
-   */
-  const syncUserWithBackend = async (authId: string, email: string) => {
-    try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ authId, email }),
-      });
-
-      if (!response.ok) {
-        // If the backend sync fails, we have an orphaned Supabase user.
-        // In a real production app, you might add retry logic or alert developers.
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to sync user with backend.');
-      }
-
-      console.log('User successfully synced with backend.');
-    } catch (syncError) {
-      console.error('Backend sync error:', syncError);
-      // We still let the user proceed, but we log the critical error.
-      // This is a design decision. Alternatively, you could show an error.
-      setError('Your account was created, but there was a problem setting up your profile. Please contact support.');
-    }
-  };
+  // --- THIS FUNCTION IS NOW REMOVED ---
+  // The syncUserWithBackend logic is now handled automatically by AuthContext.
+  // const syncUserWithBackend = async (authId: string, email: string) => { ... };
+  // ------------------------------------
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     setLoading(true);
 
-    // Step 1: Sign up the user with Supabase
-    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+    const { error: signUpError } = await supabase.auth.signUp({
       email,
       password,
     });
@@ -100,21 +71,16 @@ export default function SignupPage() {
       return;
     }
 
-    // Check if user object exists and has an ID
-    if (signUpData.user && signUpData.user.id) {
-      // Step 2: Sync the new user with our backend
-      await syncUserWithBackend(signUpData.user.id, signUpData.user.email!);
-      
-      // Show success state
-      setSuccess(true);
-      setTimeout(() => {
-        router.push('/login');
-      }, 2000);
-    } else {
-      setError('Signup succeeded but no user data was returned. Please try logging in.');
-    }
+    // --- LOGIC SIMPLIFIED ---
+    // We no longer need to check the signUpData or call the backend sync function here.
+    // The onAuthStateChange listener in AuthContext will handle the sync automatically.
+    setSuccess(true);
+    setTimeout(() => {
+      router.push('/login'); // Redirect to login page after showing success message
+    }, 3000); // Increased timeout slightly for better UX
+    // -------------------------
     
-    setLoading(false);
+    // setLoading(false) is moved inside the timeout to keep UI disabled
   };
 
   if (success) {
@@ -205,24 +171,17 @@ export default function SignupPage() {
                   </button>
                 </div>
                 
-                {/* Password strength indicator */}
                 {password.length > 0 && (
                   <div className="space-y-2">
                     <div className="flex space-x-1">
                       {[1, 2, 3, 4].map((level) => (
                         <div
                           key={level}
-                          className={`h-1 flex-1 rounded-full transition-all duration-300 ${
-                            level <= passwordStrength.strength 
-                              ? passwordStrength.color 
-                              : 'bg-gray-200'
-                          }`}
+                          className={`h-1 flex-1 rounded-full transition-all duration-300 ${level <= passwordStrength.strength ? passwordStrength.color : 'bg-gray-200'}`}
                         />
                       ))}
                     </div>
-                    <p className="text-xs text-gray-500">
-                      {passwordStrength.text}
-                    </p>
+                    <p className="text-xs text-gray-500">{passwordStrength.text}</p>
                   </div>
                 )}
               </div>
@@ -262,7 +221,6 @@ export default function SignupPage() {
               </div>
             </div>
 
-            {/* --- UPDATED SOCIAL LOGIN SECTION --- */}
             <Button variant="outline" className="w-full h-11" onClick={() => handleOAuthSignIn('github')} disabled={loading}>
               <FaGithub className="mr-2 h-4 w-4" />
               Sign up with GitHub

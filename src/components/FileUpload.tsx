@@ -53,13 +53,14 @@ export default function FileUpload({ onUploadSuccess }: { onUploadSuccess: () =>
       toast.success("Success!", { description: "Your material is ready." });
       onUploadSuccess(); // Notify the parent component to refetch data
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Upload or processing error:', error);
-      toast.error("Error", { description: error.message || "Something went wrong." });
+      const errorMessage = error instanceof Error ? error.message : "Something went wrong.";
+      toast.error("Error", { description: errorMessage });
     } finally {
       setIsUploading(false);
     }
-  }, [user, supabase, toast, onUploadSuccess]);
+  }, [user, supabase, onUploadSuccess]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -84,7 +85,7 @@ export default function FileUpload({ onUploadSuccess }: { onUploadSuccess: () =>
       ) : isDragActive ? (
         <p>Drop the file here ...</p>
       ) : (
-        <p>Drag 'n' drop a PDF, DOC, DOCX, or TXT file here, or click to select</p>
+        <p>Drag &apos;n&apos; drop a PDF, DOC, DOCX, or TXT file here, or click to select</p>
       )}
     </div>
   );

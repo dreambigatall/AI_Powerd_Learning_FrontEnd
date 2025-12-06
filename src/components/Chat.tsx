@@ -75,7 +75,7 @@ export default function Chat({ materialId, savedChatContent }: ChatProps) {
     onSuccess: (answer) => {
       setMessages(prev => [...prev, { id: `ai-${Date.now()}`, text: answer, isUserMessage: false }]);
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message);
       setMessages(prev => prev.slice(0, -1));
     },
@@ -102,7 +102,7 @@ export default function Chat({ materialId, savedChatContent }: ChatProps) {
       toast.success("Chat session saved!");
       queryClient.invalidateQueries({ queryKey: ['material', materialId] });
     },
-    onError: (error: any) => {
+    onError: (error: Error) => {
       toast.error(error.message);
     }
   });

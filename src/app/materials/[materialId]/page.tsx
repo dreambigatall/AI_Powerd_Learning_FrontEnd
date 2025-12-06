@@ -14,11 +14,12 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, BrainCircuit, HelpCircle, MessageSquare, Loader2, FileText } from "lucide-react";
+import { ArrowLeft, BrainCircuit, HelpCircle, MessageSquare, Loader2, FileText, Lightbulb } from "lucide-react";
 
 // Our Custom Components
 import Quiz, { type QuizQuestion } from "@/components/Quiz";
 import Chat from "@/components/Chat";
+import ConceptExplainer from "@/components/ConceptExplainer";
 import Markdown from 'react-markdown';
 
 const PdfViewer = dynamic(() => import('@/components/PdfViewer'), {
@@ -28,7 +29,7 @@ const PdfViewer = dynamic(() => import('@/components/PdfViewer'), {
 // Type Definitions
 interface GeneratedContent {
   _id: string;
-  type: 'summary' | 'questions' | 'chat'; // <-- CHANGED LINE: Added 'chat'
+  type: 'summary' | 'questions' | 'chat' | 'concepts';
   content: string;
 }
 
@@ -84,8 +85,7 @@ export default function MaterialStudyPage() {
             .createSignedUrl(material.storagePath, 60 * 60);
           if (error) throw error;
           if (isMounted) setPdfUrl(data?.signedUrl || null);
-        } catch (urlError: any) {
-          console.error("Error getting signed URL:", urlError);
+        } catch {
           toast.error("Could not get a link to the document file.");
           if (isMounted) setPdfUrl(null);
         }
@@ -93,13 +93,23 @@ export default function MaterialStudyPage() {
       getUrl();
       return () => { isMounted = false; };
     }
-  }, [material]);
+  }, [material, supabase.storage]);
 
   // Data Transformations
   const summary = material?.generatedContent?.find(c => c.type === 'summary');
   const quizData = material?.generatedContent?.find(c => c.type === 'questions');
-  const chatData = material?.generatedContent?.find(c => c.type === 'chat'); // <-- NEW LINE
-  const quizQuestions: QuizQuestion[] | null = quizData ? JSON.parse(quizData.content) : null;
+  const chatData = material?.generatedContent?.find(c => c.type === 'chat');
+  const conceptsData = material?.generatedContent?.find(c => c.type === 'concepts');
+  
+  // Safe JSON parsing with error handling
+  let quizQuestions: QuizQuestion[] | null = null;
+  if (quizData) {
+    try {
+      quizQuestions = JSON.parse(quizData.content);
+    } catch (e) {
+      console.error("Failed to parse quiz data:", e);
+    }
+  }
 
   // AI Generation Mutations
   const generateSummaryMutation = useMutation({
@@ -117,7 +127,7 @@ export default function MaterialStudyPage() {
       toast.success("AI summary has been generated.");
       queryClient.invalidateQueries({ queryKey: ['material', materialId] });
     },
-    onError: (err: any) => toast.error(err.message),
+    onError: (err: Error) => toast.error(err.message),
   });
 
   const generateQuizMutation = useMutation({
@@ -138,7 +148,7 @@ export default function MaterialStudyPage() {
       toast.success("AI quiz has been generated.");
       queryClient.invalidateQueries({ queryKey: ['material', materialId] });
     },
-    onError: (err: any) => toast.error(err.message),
+    onError: (err: Error) => toast.error(err.message),
   });
 
   const handleGenerateSummary = () => generateSummaryMutation.mutate();
@@ -211,25 +221,34 @@ export default function MaterialStudyPage() {
         {/* AI Content Section */}
         <section className="flex flex-col min-h-0">
           <Tabs defaultValue="summary" className="w-full h-full flex flex-col">
-            <TabsList className="grid w-full grid-cols-3 flex-shrink-0 mb-2 bg-background/80 border rounded-lg shadow-sm">
+            <TabsList className="grid w-full grid-cols-4 flex-shrink-0 mb-2 bg-background/80 border rounded-lg shadow-sm">
               <TabsTrigger
                 value="summary"
-                className="flex items-center gap-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg data-[state=active]:font-bold data-[state=active]:scale-105 transition-all"
+                className="flex items-center gap-1 text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg data-[state=active]:font-bold transition-all"
               >
-                <BrainCircuit className="mr-1 h-4 w-4" />Summary
+                <BrainCircuit className="h-4 w-4" />
+                <span className="hidden sm:inline">Summary</span>
               </TabsTrigger>
               <TabsTrigger
                 value="quiz"
-                className="flex items-center gap-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg data-[state=active]:font-bold data-[state=active]:scale-105 transition-all"
+                className="flex items-center gap-1 text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg data-[state=active]:font-bold transition-all"
               >
-                <HelpCircle className="mr-1 h-4 w-4" />Quiz
+                <HelpCircle className="h-4 w-4" />
+                <span className="hidden sm:inline">Quiz</span>
               </TabsTrigger>
               <TabsTrigger
                 value="chat"
-                className="flex items-center gap-1 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg data-[state=active]:font-bold data-[state=active]:scale-105 transition-all"
-                aria-label="Chat with Document"
+                className="flex items-center gap-1 text-xs sm:text-sm data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-lg data-[state=active]:font-bold transition-all"
               >
-                <MessageSquare className="mr-1 h-4 w-4" />Chat
+                <MessageSquare className="h-4 w-4" />
+                <span className="hidden sm:inline">Chat</span>
+              </TabsTrigger>
+              <TabsTrigger
+                value="concepts"
+                className="flex items-center gap-1 text-xs sm:text-sm data-[state=active]:bg-amber-500 data-[state=active]:text-white data-[state=active]:shadow-lg data-[state=active]:font-bold transition-all"
+              >
+                <Lightbulb className="h-4 w-4" />
+                <span className="hidden sm:inline">Concepts</span>
               </TabsTrigger>
             </TabsList>
 
@@ -282,7 +301,16 @@ export default function MaterialStudyPage() {
                 {materialId && (
                   <Chat 
                     materialId={materialId} 
-                    savedChatContent={chatData?.content || null} // <-- CHANGED LINE
+                    savedChatContent={chatData?.content || null}
+                  />
+                )}
+              </TabsContent>
+
+              <TabsContent value="concepts" className="h-full flex flex-col">
+                {materialId && (
+                  <ConceptExplainer 
+                    materialId={materialId} 
+                    savedConceptsContent={conceptsData?.content || null}
                   />
                 )}
               </TabsContent>
