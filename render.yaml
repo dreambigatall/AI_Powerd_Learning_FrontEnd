@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: ai-learning-frontend
+    env: node
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    plan: starter  # or 'free' for free tier
+    region: oregon  # or your preferred region
+    envVars:
+      - key: NODE_ENV
+        value: production
+      # IMPORTANT: Add these in Render Dashboard → Environment Variables
+      # - key: NEXT_PUBLIC_API_URL
+      #   value: https://ai-powerd-learning-backend.onrender.com
+      # - key: NEXT_PUBLIC_SUPABASE_URL
+      #   value: your-supabase-project-url
+      # - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
+      #   value: your-supabase-anon-key
+
