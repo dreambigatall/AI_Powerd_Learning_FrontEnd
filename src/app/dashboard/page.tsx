@@ -57,7 +57,7 @@ export default function DashboardPage() {
             toast.success("Material deleted successfully.");
             queryClient.invalidateQueries({ queryKey: ["materials", user?.id] });
         },
-        onError: (err: any) => toast.error(err.message),
+        onError: (err: Error) => toast.error(err.message),
         onSettled: () => setDeletingId(null),
     });
 

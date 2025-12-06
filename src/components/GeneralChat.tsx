@@ -8,7 +8,7 @@ import { toast } from 'sonner';
 import Markdown from 'react-markdown';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Loader2, Send, User, Bot, Sparkles, Trash2, ArrowUp } from 'lucide-react';
+import { Loader2, User, Bot, Sparkles, Trash2, ArrowUp } from 'lucide-react';
 import type { ChatHistoryItem } from '@/lib/types/api';
 
 interface Message {

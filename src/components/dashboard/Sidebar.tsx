@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { BookOpen, UploadCloud, FileText, LogOut, Sparkles, Route } from "lucide-react";
+import { BookOpen, FileText, LogOut, Sparkles, Route } from "lucide-react";
 
 interface SidebarProps {
   onLogout: () => void;

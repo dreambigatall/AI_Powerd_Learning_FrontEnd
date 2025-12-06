@@ -85,8 +85,7 @@ export default function MaterialStudyPage() {
             .createSignedUrl(material.storagePath, 60 * 60);
           if (error) throw error;
           if (isMounted) setPdfUrl(data?.signedUrl || null);
-        } catch (urlError: any) {
-          console.error("Error getting signed URL:", urlError);
+        } catch {
           toast.error("Could not get a link to the document file.");
           if (isMounted) setPdfUrl(null);
         }
@@ -94,7 +93,7 @@ export default function MaterialStudyPage() {
       getUrl();
       return () => { isMounted = false; };
     }
-  }, [material]);
+  }, [material, supabase.storage]);
 
   // Data Transformations
   const summary = material?.generatedContent?.find(c => c.type === 'summary');
@@ -128,7 +127,7 @@ export default function MaterialStudyPage() {
       toast.success("AI summary has been generated.");
       queryClient.invalidateQueries({ queryKey: ['material', materialId] });
     },
-    onError: (err: any) => toast.error(err.message),
+    onError: (err: Error) => toast.error(err.message),
   });
 
   const generateQuizMutation = useMutation({
@@ -149,7 +148,7 @@ export default function MaterialStudyPage() {
       toast.success("AI quiz has been generated.");
       queryClient.invalidateQueries({ queryKey: ['material', materialId] });
     },
-    onError: (err: any) => toast.error(err.message),
+    onError: (err: Error) => toast.error(err.message),
   });
 
   const handleGenerateSummary = () => generateSummaryMutation.mutate();

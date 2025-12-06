@@ -23,7 +23,7 @@ import {
   CheckCircle2,
   AlertCircle
 } from 'lucide-react';
-import type { LearningPath as LearningPathType, LearningPathResponse } from '@/lib/types/api';
+import type { LearningPathResponse } from '@/lib/types/api';
 
 export default function LearningPath() {
   const { supabase } = useSupabase();
@@ -33,7 +33,7 @@ export default function LearningPath() {
   const [showForm, setShowForm] = useState(false);
 
   // Fetch existing learning path
-  const { data: pathData, isLoading, error } = useQuery<LearningPathResponse>({
+  const { data: pathData, isLoading } = useQuery<LearningPathResponse>({
     queryKey: ['learning-path'],
     queryFn: async () => {
       const { data: { session } } = await supabase.auth.getSession();
